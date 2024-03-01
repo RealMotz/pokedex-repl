@@ -45,10 +45,20 @@ func commands() map[string]cliCommand {
 			description: "Displays a help message",
 			callback:    helpCommand,
 		},
+		"map": {
+			name:        "map",
+			description: "Displays 20 pokemon cities",
+			callback:    mapCommand,
+		},
 		"exit": {
 			name:        "exit",
 			description: "Exit the application",
 			callback:    exitCommand,
+		},
+		"bmap": {
+			name:        "bmap",
+			description: "Displays the previous 20 Pokemon cities",
+			callback:    mapBackCommand,
 		},
 	}
 }
