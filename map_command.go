@@ -3,72 +3,67 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+	"time"
+
+	"github.com/RealMotz/pokedex-repl/internal/pokeapi"
+	"github.com/RealMotz/pokedex-repl/internal/pokecache"
 )
 
-type PokeLocation struct {
-	Count    int     `json:"count"`
-	Next     *string `json:"next"`
-	Previous *string `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	}
-}
+var location pokeapi.PokeLocation
+var startingUrl string = "https://pokeapi.co/api/v2/location/?offset=0&limit=20"
+var next *string = &startingUrl
+var prev *string = nil
+var cache pokecache.PokeCache = pokecache.NewCache(time.Second * 86400)
 
-func getLocation(url string) PokeLocation {
-	res, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
-
-	if res.StatusCode > 299 {
-		fmt.Println(err)
-	}
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	location := PokeLocation{}
-	decodingErr := json.Unmarshal(body, &location)
-	if decodingErr != nil {
-		fmt.Println(err)
-	}
-	return location
-}
-
-var location PokeLocation
-
-func printMaps(locations PokeLocation) {
-  fmt.Println("============================")
+func printMaps(locations pokeapi.PokeLocation) {
+	fmt.Println("============================")
 	for _, loc := range locations.Results {
 		fmt.Println(loc.Name)
 	}
-  fmt.Println("============================")
+	fmt.Println("============================")
 }
 
-func mapCommand() error {
-	if location.Next == nil {
-		location = getLocation("https://pokeapi.co/api/v2/location/")
-	} else {
-		location = getLocation(*location.Next)
+func mapCommand(client pokeapi.Client) error {
+	if next == nil {
+		next = &startingUrl
 	}
-  printMaps(location)
+	if val, ok := cache.Get(*next); ok {
+		json.Unmarshal(val, &location)
+		next = location.Next
+		prev = location.Previous
+		printMaps(location)
+		return nil
+	}
 
+	location = client.GetLocation(*next)
+	val, err := json.Marshal(location)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	cache.Add(*next, val)
+	prev = location.Previous 
+	next = location.Next
+	printMaps(location)
 	return nil
 }
 
-func mapBackCommand() error {
-	if location.Previous == nil {
-    fmt.Println("Nothing to display")
-    return nil
+func mapBackCommand(client pokeapi.Client) error {
+	if prev == nil {
+    next = &startingUrl
+		fmt.Println("Nothing to display")
+		return nil
 	}
-	location = getLocation(*location.Previous)
-  printMaps(location)
+	val, ok := cache.Get(*prev)
+	if !ok {
+		fmt.Println("No records founds in cache")
+		return nil
+	}
 
+	json.Unmarshal(val, &location)
+	next = location.Next
+	prev = location.Previous
+	printMaps(location)
 	return nil
 }

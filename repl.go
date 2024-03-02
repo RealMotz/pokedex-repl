@@ -5,15 +5,11 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/RealMotz/pokedex-repl/internal/pokeapi"
 )
 
-type cliCommand struct {
-	name        string
-	description string
-	callback    func() error
-}
-
-func startRepl() {
+func startRepl(client pokeapi.Client) {
 	fmt.Println("Welcome to the PokeDex!")
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Printf("Pokedex > ")
@@ -26,7 +22,7 @@ func startRepl() {
 			fmt.Printf("Pokedex > ")
 			continue
 		}
-		ok := cmds[userInput].callback()
+		ok := cmds[userInput].callback(client)
 		if ok != nil {
 			return
 		}
@@ -36,6 +32,12 @@ func startRepl() {
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
+}
+
+type cliCommand struct {
+	name        string
+	description string
+	callback    func(pokeapi.Client) error
 }
 
 func commands() map[string]cliCommand {
@@ -50,15 +52,15 @@ func commands() map[string]cliCommand {
 			description: "Displays 20 pokemon cities",
 			callback:    mapCommand,
 		},
+    "bmap": {
+			name:        "bmap",
+			description: "Displays the previous 20 Pokemon cities",
+			callback:    mapBackCommand,
+		},
 		"exit": {
 			name:        "exit",
 			description: "Exit the application",
 			callback:    exitCommand,
-		},
-		"bmap": {
-			name:        "bmap",
-			description: "Displays the previous 20 Pokemon cities",
-			callback:    mapBackCommand,
 		},
 	}
 }

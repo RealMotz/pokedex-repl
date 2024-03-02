@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/RealMotz/pokedex-repl/internal/pokeapi"
 )
 
-func helpCommand() error {
+func helpCommand(client pokeapi.Client) error {
 	fmt.Println("Welcome to the PokeDex!")
 	fmt.Println("")
 	fmt.Println("Usage: ")

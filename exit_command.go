@@ -2,8 +2,9 @@ package main
 
 import (
 	"errors"
+	"github.com/RealMotz/pokedex-repl/internal/pokeapi"
 )
 
-func exitCommand() error {
+func exitCommand(client pokeapi.Client) error {
 	return errors.New("EOF")
 }
