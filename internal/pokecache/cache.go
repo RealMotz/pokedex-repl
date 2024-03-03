@@ -50,7 +50,7 @@ func (c *PokeCache) Get(key string) ([]byte, bool) {
 }
 
 func (c *PokeCache) reapLoop() {
-	ticker := time.NewTicker(time.Hour)
+	ticker := time.NewTicker(c.interval)
 	defer ticker.Stop()
 	<-ticker.C
 	for key, val := range c.cache {
