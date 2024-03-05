@@ -11,33 +11,38 @@ import (
 
 func startRepl(client pokeapi.Client) {
 	fmt.Println("Welcome to the PokeDex!")
-	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Printf("Pokedex > ")
+	scanner := bufio.NewScanner(os.Stdin)
 	cmds := commands()
 
 	for scanner.Scan() {
-		userInput := clean(scanner.Text())
-		if _, ok := cmds[userInput]; !ok {
-			fmt.Println("command not found")
+		userInput := strings.Split(scanner.Text(), " ")
+		command := clean(userInput[0])
+		args := ""
+		if len(userInput) == 2 {
+			args = clean(userInput[1])
+		}
+
+		if _, ok := cmds[command]; !ok {
+			fmt.Println("not a valid command")
+			fmt.Println("type 'help' to see all available options")
 			fmt.Printf("Pokedex > ")
 			continue
 		}
-		ok := cmds[userInput].callback(client)
-		if ok != nil {
-			return
+		err := cmds[command].callback(client, args)
+		if err != nil {
+      fmt.Println(err)
+			fmt.Printf("Pokedex > ")
+			continue
 		}
 		fmt.Printf("Pokedex > ")
-	}
-
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(pokeapi.Client) error
+	callback    func(pokeapi.Client, string) error
 }
 
 func commands() map[string]cliCommand {
@@ -49,13 +54,18 @@ func commands() map[string]cliCommand {
 		},
 		"map": {
 			name:        "map",
-			description: "Displays 20 pokemon cities",
+			description: "Displays 20 locations",
 			callback:    mapCommand,
 		},
-    "bmap": {
+		"bmap": {
 			name:        "bmap",
-			description: "Displays the previous 20 Pokemon cities",
+			description: "Displays the previous 20 locations",
 			callback:    mapBackCommand,
+		},
+		"explore": {
+			name:        "explore <location-name>",
+			description: "Shows the pokemon encounters in a given area",
+			callback:    exploreCommand,
 		},
 		"exit": {
 			name:        "exit",
