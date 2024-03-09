@@ -22,6 +22,11 @@ func startRepl(client pokeapi.Client) {
 		if len(userInput) == 2 {
 			args = clean(userInput[1])
 		}
+    if len(userInput) > 2 {
+      fmt.Println("too many arguments")
+			fmt.Printf("Pokedex > ")
+      continue
+    }
 
 		if _, ok := cmds[command]; !ok {
 			fmt.Println("not a valid command")
@@ -31,7 +36,7 @@ func startRepl(client pokeapi.Client) {
 		}
 		err := cmds[command].callback(client, args)
 		if err != nil {
-      fmt.Println(err)
+			fmt.Println(err)
 			fmt.Printf("Pokedex > ")
 			continue
 		}
@@ -66,6 +71,11 @@ func commands() map[string]cliCommand {
 			name:        "explore <location-name>",
 			description: "Shows the pokemon encounters in a given area",
 			callback:    exploreCommand,
+		},
+		"catch": {
+			name:        "catch <pokemon-name>",
+			description: "Attempts to capture a pokemon",
+			callback:    catchCommand,
 		},
 		"exit": {
 			name:        "exit",

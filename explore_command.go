@@ -18,7 +18,7 @@ func exploreCommand(client pokeapi.Client, area string) error {
 	url := Concatenate(locationAreaUrl, area)
 	if val, ok := cache.Get(url); ok {
 		json.Unmarshal(val, &pokeArea)
-    printPokemon(pokeArea)
+		printPokemon(pokeArea)
 		return nil
 	}
 
@@ -33,7 +33,7 @@ func exploreCommand(client pokeapi.Client, area string) error {
 	}
 
 	cache.Add(url, val)
-  printPokemon(pokeArea)	
+	printPokemon(pokeArea)
 	return nil
 }
 

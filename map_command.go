@@ -52,10 +52,13 @@ func mapCommand(client pokeapi.Client, param string) error {
 		return nil
 	}
 
-	location = client.GetLocation(*next)
+  location, err := client.GetLocation(*next)
+  if err != nil {
+    return err
+  }
+
 	val, err := json.Marshal(location)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
