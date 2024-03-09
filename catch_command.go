@@ -25,10 +25,12 @@ func catchCommand(client pokeapi.Client, pokemonName string) error {
 		return err
 	}
 
-	catchChance := pokemon.BaseExperience / 10
+	catchChance := pokemon.BaseExperience / 2
 	boost := []int{1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4}
 	catchAttempt := boost[rand.Intn(len(boost))] * catchChance
 	roll := r.Intn(pokemon.BaseExperience)
+  fmt.Println(catchAttempt)
+  fmt.Println(roll)
 
 	catched := catchAttempt >= roll
 	fmt.Println("Throwing a Pokeball at " + pokemon.Name)
